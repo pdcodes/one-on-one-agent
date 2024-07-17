@@ -3,3 +3,8 @@ python-dotenv
 langchain-openai
 chainlit
 tiktoken
+openai
+langchain_community
+numexpr
+nbconvert
+wikipedia
