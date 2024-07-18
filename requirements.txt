@@ -1,10 +1,9 @@
-langchain
-python-dotenv
-langchain-openai
 chainlit
 tiktoken
-openai
-langchain_community
-numexpr
-nbconvert
-wikipedia
+langchain-qdrant
+langchain==0.2.5
+langchain_community==0.2.5
+langchain_core==0.2.9
+langchain_huggingface==0.0.3
+langchain_text_splitters==0.2.1
+python-dotenv==1.0.1

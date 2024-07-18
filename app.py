@@ -1,67 +1,124 @@
+# ---- IMPORTS ---- # 
+import os
 import chainlit as cl
-from langchain_openai import OpenAI
-from langchain.chains import LLMMathChain, LLMChain
-from langchain.prompts import PromptTemplate
-from langchain_community.utilities import WikipediaAPIWrapper
-from langchain.agents.agent_types import AgentType
-from langchain.agents import Tool, initialize_agent
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
+from langchain.schema import StrOutputParser
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain.schema.runnable import Runnable
+from langchain.schema.runnable.config import RunnableConfig
+from langchain.prompts import ChatPromptTemplate
+from langchain_qdrant import QdrantVectorStore
+from langchain_openai import OpenAIEmbeddings
+from langchain.agents import initialize_agent, Tool, AgentType, AgentExecutor
 from dotenv import load_dotenv
 
+import chainlit as cl
+
+# ---- ENV VARIABLES ---- # 
+HF_LLM_ENDPOINT = os.environ["HF_LLM_ENDPOINT"]
+HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
+HF_TOKEN = os.environ["HF_TOKEN"]
+QDRANT_API = os.environ["QDRANT_API_KEY"]
+
+
+# ---- LOAD ENV VARIABLES ---- # 
 load_dotenv()
 
+# ---- SET UP CHAT LLM ---- # 
+chat_llm = HuggingFaceEndpoint(
+    endpoint_url=HF_LLM_ENDPOINT,
+    top_k=10,
+    top_p=0.95,
+    temperature=0.5,
+    repetition_penalty=1.15,
+    huggingfacehub_api_token=HF_TOKEN,
+)
+
+# ---- SET UP EMBEDDINGS / QDRANT ---- # 
+"""
+from qdrant_client import QdrantClient
+
+qdrant_client = QdrantClient(
+    url="https://4d7645f8-ea2b-40be-b446-27506ccf0cf7.us-east4-0.gcp.cloud.qdrant.io:6333", 
+    api_key="WixlUGIvJfjbiG-7pvoGNMc_zdLbaVlyvly0MQjQ2CyWS2PU7VWO4Q",
+)
+
+print(qdrant_client.get_collections())
+
+url = "<---qdrant cloud cluster url here --->"
+api_key = "<---api key here--->"
+qdrant = QdrantVectorStore.from_documents(
+    docs,
+    embeddings,
+    url=url,
+    prefer_grpc=True,
+    api_key=api_key,
+    collection_name="my_documents",
+)
+
+"""
+
+# ---- DEFINE PROMPT TEMPLATE ---- # 
+prompt_template = ChatPromptTemplate.from_messages(
+    [
+        ("system",
+            """
+            You should play the role of a helpful team member who is eager to hear about what their other team members are working on.
+            Your tone throughout the conversation should remain interested and positive.
+
+            The goal of your conversation is to collect information from the user about their projects.
+
+            You should continue to converse with the user until you have the following information from them:
+            - Information about what they have recently accomplished on their project
+            - Information about things that they are struggling with 
+            - Information that would indicate if a project is falling behind
+
+            When you have collected this information, you should recite it back to the user in the following format:
+            Section #1: Recent wins and achievements
+            This section will include information about what the team member has recently accomplished on their project
+
+            Section #2: Blockers and challenges
+            This section will include information about where the team member is struggling and what issues have come up on specific projects
+
+            Section #3: Risks to company goals
+            This section will include information about projects that are not moving forward
+
+            Once you have provided the information to the user in this format, you should ask them to confirm if this sounds correct. If it is correct, then you should end the conversation.
+            """),
+        ("user", "{question}\n"),
+    ]
+)
+
+# ---- START CHAINLIT ---- # 
 @cl.on_chat_start
-def math_chatbot():
-    llm = OpenAI(model='gpt-3.5-turbo-instruct',
-                 temperature=0)
+async def one_on_one_update_agent():
+    model = chat_llm
+    prompt = prompt_template
+    runnable = prompt | model | StrOutputParser()
+    cl.user_session.set("runnable", runnable)
 
-    word_problem_template = """You are a reasoning agent tasked with solving the user's logic-based questions.
-    Logically arrive at the solution, and be factual. In your answers, clearly detail the steps involved and give
-    the final answer. Provide the response in bullet points. Question  {question} Answer"""
+# ---- HANDLE MESSAGES AND RESPONES ---- # 
+@cl.on_message
+async def main(message: cl.Message):
+    runnable = cl_user_session.get("runnable")
+    msg = cl.Message(content="")
 
-    math_assistant_prompt = PromptTemplate(
-        input_variables=["question"],
-        template=word_problem_template
-    )
-
-    word_problem_chain = LLMChain(llm=llm,prompt=math_assistant_prompt)
-    word_problem_tool = Tool.from_function(name="Reasoning Tool",
-                                           func=word_problem_chain.run,
-                                           description="Useful for when you need to answer logic-based/reasoning  "
-                                                       "questions.",
-                                        )
-
-    problem_chain = LLMMathChain.from_llm(llm=llm)
-    math_tool = Tool.from_function(name="Calculator",
-                                   func=problem_chain.run,
-                                   description="Useful for when you need to answer numeric questions. This tool is "
-                                               "only for math questions and nothing else. Only input math "
-                                               "expressions, without text",
-                                   )
-
-    wikipedia = WikipediaAPIWrapper()
-    # Wikipedia Tool
-    wikipedia_tool = Tool(
-        name="Wikipedia",
-        func=wikipedia.run,
-        description="A useful tool for searching the Internet to find information on world events, issues, dates, "
-                    "years, etc. Worth using for general topics. Use precise questions.",
-    )
-
-    agent = initialize_agent(
-        tools=[wikipedia_tool],
-        llm=llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=False,
-        handle_parsing_errors=True
-    )
-    cl.user_session.set("agent", agent)
-
+    llm = cl.user_session.get("llm_chain")
+    res = await llm.acall(message.content, callbacks=[cl.AsyncLangchainCallbackHandler()])
+    await cl.Message(content=res["text"]).send()
 
 @cl.on_message
-async def process_user_query(message: cl.Message):
-    agent = cl.user_session.get("agent")
+async def on_message(message: cl.Message):
+    runnable = cl.user_session.get("runnable")  # type: Runnable
 
-    response = await agent.acall(message.content,
-                                 callbacks=[cl.AsyncLangchainCallbackHandler()])
+    msg = cl.Message(content="")
 
-    await cl.Message(response["output"]).send()
+    for chunk in await cl.make_async(runnable.stream)(
+        {"question": message.content},
+        config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
+    ):
+        await msg.stream_token(chunk)
+
+    await msg.send()
