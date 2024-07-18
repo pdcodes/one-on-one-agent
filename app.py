@@ -92,6 +92,13 @@ prompt_template = ChatPromptTemplate.from_messages(
 )
 
 # ---- START CHAINLIT ---- # 
+@cl.author_rename
+def rename(original_author: str):
+    rename_dict = {
+        "Assistant" : "Updates"
+    }
+    return rename_dict.get(original_author, original_author)
+
 @cl.on_chat_start
 async def one_on_one_update_agent():
     model = chat_llm
@@ -100,15 +107,6 @@ async def one_on_one_update_agent():
     cl.user_session.set("runnable", runnable)
 
 # ---- HANDLE MESSAGES AND RESPONES ---- # 
-@cl.on_message
-async def main(message: cl.Message):
-    runnable = cl_user_session.get("runnable")
-    msg = cl.Message(content="")
-
-    llm = cl.user_session.get("llm_chain")
-    res = await llm.acall(message.content, callbacks=[cl.AsyncLangchainCallbackHandler()])
-    await cl.Message(content=res["text"]).send()
-
 @cl.on_message
 async def on_message(message: cl.Message):
     runnable = cl.user_session.get("runnable")  # type: Runnable
