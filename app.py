@@ -18,9 +18,9 @@ import chainlit as cl
 
 # ---- ENV VARIABLES ---- # 
 HF_LLM_ENDPOINT = os.environ["HF_LLM_ENDPOINT"]
-HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
+# HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
 HF_TOKEN = os.environ["HF_TOKEN"]
-QDRANT_API = os.environ["QDRANT_API_KEY"]
+# QDRANT_API = os.environ["QDRANT_API_KEY"]
 
 
 # ---- LOAD ENV VARIABLES ---- # 
