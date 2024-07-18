@@ -10,7 +10,7 @@ from langchain.schema.runnable import Runnable
 from langchain.schema.runnable.config import RunnableConfig
 from langchain.prompts import ChatPromptTemplate
 from langchain_qdrant import QdrantVectorStore
-from langchain_openai import OpenAIEmbeddings
+# from langchain_openai import OpenAIEmbeddings
 from langchain.agents import initialize_agent, Tool, AgentType, AgentExecutor
 from dotenv import load_dotenv
 
