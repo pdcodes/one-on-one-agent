@@ -17,9 +17,9 @@ from dotenv import load_dotenv
 import chainlit as cl
 
 # ---- ENV VARIABLES ---- # 
+HF_TOKEN = os.environ["HF_TOKEN"]
 HF_LLM_ENDPOINT = os.environ["HF_LLM_ENDPOINT"]
 # HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
-HF_TOKEN = os.environ["HF_TOKEN"]
 # QDRANT_API = os.environ["QDRANT_API_KEY"]
 
 
@@ -86,16 +86,39 @@ prompt_template = ChatPromptTemplate.from_messages(
             This section will include information about projects that are not moving forward
 
             Once you have provided the information to the user in this format, you should ask them to confirm if this sounds correct. If it is correct, then you should end the conversation.
+
+            You should NOT attempt to make up any part of the user's updates. You should only respond with questions to ensure that you have captured all three of the key components of their update.
             """),
         ("user", "{question}\n"),
     ]
 )
 
 # ---- START CHAINLIT ---- # 
+@cl.set_starters
+async def set_starters():
+    return [
+        cl.Starter(
+            label="Label 1",
+            message="Label 1 Message",
+            icon="/public/logo_dark.png",
+            ),
+
+        cl.Starter(
+            label="Label 2",
+            message="Label 2 Message",
+            icon="/public/logo_dark.png",
+            ),
+        cl.Starter(
+            label="Label 3",
+            message="Label 3 Message",
+            icon="/public/logo_dark.png",
+            )
+        ]
+
 @cl.author_rename
 def rename(original_author: str):
     rename_dict = {
-        "Assistant" : "Updates"
+        "Assistant" : "Update Bot"
     }
     return rename_dict.get(original_author, original_author)
 
