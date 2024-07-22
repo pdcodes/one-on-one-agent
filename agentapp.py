@@ -61,7 +61,6 @@ def math_chatbot():
 async def process_user_query(message: cl.Message):
     agent = cl.user_session.get("agent")
 
-    response = await agent.acall(message.content,
-                                 callbacks=[cl.AsyncLangchainCallbackHandler()])
+    response = await agent.acall(message.content, callbacks=[cl.AsyncLangchainCallbackHandler()])
 
     await cl.Message(response["output"]).send()

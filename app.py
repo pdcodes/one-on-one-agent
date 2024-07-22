@@ -1,20 +1,29 @@
 # ---- IMPORTS ---- # 
+# ---- BASIC STUFF ---- # 
 import os
+from dotenv import load_dotenv
 import chainlit as cl
+
+# ---- PROCESSING INPUTS AND OUTPUTS ---- # 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_text_splitters import CharacterTextSplitter
 from langchain.schema import StrOutputParser
+
+# ---- LLM SETUP ---- # 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
+
+# ---- CHATBOT/AGENT BEHAVIOR ---- # 
 from langchain.schema.runnable import Runnable
 from langchain.schema.runnable.config import RunnableConfig
 from langchain.prompts import ChatPromptTemplate
 from langchain_qdrant import QdrantVectorStore
 # from langchain_openai import OpenAIEmbeddings
 from langchain.agents import initialize_agent, Tool, AgentType, AgentExecutor
-from dotenv import load_dotenv
-
-import chainlit as cl
+from typing import Annotated
+from typing_extensions import TypedDict
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 
 # ---- ENV VARIABLES ---- # 
 HF_TOKEN = os.environ["HF_TOKEN"]
@@ -94,6 +103,7 @@ prompt_template = ChatPromptTemplate.from_messages(
 )
 
 # ---- START CHAINLIT ---- # 
+"""
 @cl.set_starters
 async def set_starters():
     return [
@@ -114,6 +124,7 @@ async def set_starters():
             icon="/public/logo_dark.png",
             )
         ]
+"""
 
 @cl.author_rename
 def rename(original_author: str):
