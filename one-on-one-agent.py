@@ -27,6 +27,8 @@ from langgraph.graph import StateGraph, START, END
 import operator
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
+from prompts import context_message_prompt
+from langchain.memory.buffer import ConversationBufferMemory
 
 # ---- ENV VARIABLES ---- # 
 # HF_TOKEN = os.environ["HF_TOKEN"]
@@ -41,16 +43,19 @@ os.environ["LANGCHAIN_PROJECT"] = "One on One Agent"
 load_dotenv()
 
 # ---- SETTING UP OUR TOOL BELT ---- # 
-from write_to_qdrant import WriteToQdrant
+# Import our tools
+from update_checker import UpdateChecker
+update_checker = UpdateChecker()
+
+# from write_to_qdrant import WriteToQdrant
 
 tool_belt = [
-    WriteToQdrant(),
-    CheckUpdates()
+    update_checker
 ]
-
+"""
 from langgraph.prebuilt import ToolExecutor
 tool_executor = ToolExecutor(tool_belt)
-
+"""
 # ---- SET UP CHAT LLM ---- # 
 # Prototyping first with Open AI
 """
@@ -63,12 +68,11 @@ chat_llm = HuggingFaceEndpoint(
     huggingfacehub_api_token=HF_TOKEN,
 )
 """
+# Setting up Open AI
+chat_llm = ChatOpenAI(model="gpt-4o", temperature=0, streaming=True)
 
-chat_llm = ChatOpenAI(model="gpt-4o", temperature=0)
-
-from langchain_core.utils.function_calling import convert_to_openai_function
-functions = [convert_to_openai_function(t) for t in tool_belt]
-chat_llm = chat_llm.bind_functions(functions)
+# Setting up memory
+conversation_memory = ConversationBufferMemory(memory_key="chat_history", max_len=200, return_messages=True)
 
 # ---- SET UP STATE OBJECT ---- # 
 class AgentState(TypedDict):
@@ -87,7 +91,6 @@ def chatbot(state: AgentState):
 # the node is used.
 graph_builder.add_node("chatbot", chatbot)
 
-
 graph_builder.add_edge(START, "chatbot")
 graph_builder.add_edge("chatbot", END)
 graph = graph_builder.compile()
@@ -96,7 +99,7 @@ graph = graph_builder.compile()
 @cl.on_chat_start
 async def one_on_one_update_agent():
     model = chat_llm
-    prompt = prompt_template
+    prompt = context_message_prompt
     runnable = prompt | model | StrOutputParser()
     cl.user_session.set("runnable", runnable)
 
@@ -107,10 +110,18 @@ async def on_message(message: cl.Message):
 
     msg = cl.Message(content="")
 
-    for chunk in await cl.make_async(runnable.stream)(
-        {"question": message.content},
+    # Access chat history messages
+    chat_history = "\n".join([msg.content for msg in conversation_memory.chat_memory.messages])
+
+    for chunk in runnable.stream(
+        {"chat_history": chat_history, "question": message.content},
         config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
     ):
         await msg.stream_token(chunk)
 
     await msg.send()
+
+    # Check the response using the UpdateChecker tool
+    check_response = update_checker(message.content)
+    check_msg = cl.Message(content=check_response.content)
+    await check_msg.send()
