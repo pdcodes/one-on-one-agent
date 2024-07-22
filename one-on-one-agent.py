@@ -12,35 +12,28 @@ from langchain.schema import StrOutputParser
 # ---- LLM SETUP ---- # 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_openai import ChatOpenAI
+# from langchain_openai import OpenAIEmbeddings
 
 # ---- CHATBOT/AGENT BEHAVIOR ---- # 
 from langchain.schema.runnable import Runnable
 from langchain.schema.runnable.config import RunnableConfig
 from langchain.prompts import ChatPromptTemplate
 from langchain_qdrant import QdrantVectorStore
-# from langchain_openai import OpenAIEmbeddings
 from langchain.agents import initialize_agent, Tool, AgentType, AgentExecutor
 from typing import Annotated
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from IPython.display import Image, display
-from langchain_openai import ChatOpenAI
 
 # ---- ENV VARIABLES ---- # 
-# HF_TOKEN = os.environ["HF_TOKEN"]
-# HF_LLM_ENDPOINT = os.environ["HF_LLM_ENDPOINT"]
-# HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
-# QDRANT_API = os.environ["QDRANT_API_KEY"]
+HF_TOKEN = os.environ["HF_TOKEN"]
+HF_LLM_ENDPOINT = os.environ["HF_LLM_ENDPOINT"]
+HF_EMBED_ENDPOINT = os.environ["HF_EMBED_ENDPOINT"]
+QDRANT_API = os.environ["QDRANT_API_KEY"]
 OPENAI_API_KEY= os.environ["OPENAI_API_KEY"]
-
-"""
-qdrant_client = QdrantClient(
-url="https://20970653-0575-4b50-9e09-91ebdef2f6d3.us-east4-0.gcp.cloud.qdrant.io:6333/",
-api_key="RXRLSeAc0CstY0_kCNpR1S2Kq-KxCKyE1TXMPNYVLboXsCcCmYsH8Q",
-)
-"""
-
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "One on One Agent"
 
 # ---- LOAD ENV VARIABLES ---- # 
 load_dotenv()
@@ -56,7 +49,7 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 # ---- SET UP CHAT LLM ---- # 
-# Using OpenAI while HF is down
+# Prototyping first with Open AI
 """
 chat_llm = HuggingFaceEndpoint(
     endpoint_url=HF_LLM_ENDPOINT,
@@ -84,17 +77,25 @@ graph_builder.add_edge(START, "chatbot")
 graph_builder.add_edge("chatbot", END)
 graph = graph_builder.compile()
 
-try:
-    display(Image(graph.get_graph().draw_mermaid_png()))
-except Exception:
-    # This requires some extra dependencies and is optional
-    pass
+# ---- START CHAT ---- #
+@cl.on_chat_start
+async def one_on_one_update_agent():
+    model = chat_llm
+    prompt = prompt_template
+    runnable = prompt | model | StrOutputParser()
+    cl.user_session.set("runnable", runnable)
 
-while True:
-    user_input = input("User: ")
-    if user_input.lower() in ["quit", "exit", "q"]:
-        print("Goodbye!")
-        break
-    for event in graph.stream({"messages": ("user", user_input)}):
-        for value in event.values():
-            print("Agent Awesome:", value["messages"][-1].content)
+# ---- HANDLE MESSAGES AND RESPONES ---- # 
+@cl.on_message
+async def on_message(message: cl.Message):
+    runnable = cl.user_session.get("runnable")  # type: Runnable
+
+    msg = cl.Message(content="")
+
+    for chunk in await cl.make_async(runnable.stream)(
+        {"question": message.content},
+        config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
+    ):
+        await msg.stream_token(chunk)
+
+    await msg.send()
