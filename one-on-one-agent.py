@@ -238,6 +238,7 @@ def should_continue(state: AgentState) -> Literal["continue", "end"]:
     update_state = state["update_state"]
     required_fields = ["name", "project", "accomplishments", "blockers", "risks", "personal_updates"]
     if all(update_state.get(field, False) for field in required_fields):
+        print("Reached end.")
         return "end"
     return "continue"
 
@@ -293,6 +294,9 @@ async def on_message(message: cl.Message):
     update_state = cl.user_session.get("update_state")
     category = cl.user_session.get("category")
     user_email = cl.user_session.get("user_email")  # Change from "user_name" to "user_email"
+
+    print(category)
+    print(user_email)
     
     result = graph.invoke({
         "messages": [HumanMessage(content=message.content)],
@@ -307,6 +311,7 @@ async def on_message(message: cl.Message):
     print(f"Result: \n", result)
     
     if should_continue(result) == "end":
+        print("We hit end.")
         summary = generate_summary(memory)
         await cl.Message(f"Great! We've completed your update. Here's a summary of what we've discussed:\n\n{summary}\n\nWe'll go ahead and save this update for your manager.").send()
         
