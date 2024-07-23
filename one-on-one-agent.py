@@ -10,10 +10,13 @@ from langchain.schema.output_parser import StrOutputParser
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Annotated, List, Tuple, Union, Optional, Literal
 from langgraph.graph.message import add_messages
+import pprint
+import ast
 
 # ---- CUSTOM LOGIC ---- #
 from prompts import chat_prompt
 from update_checker import UpdateChecker
+from write_to_qdrant import write_to_qdrant
 
 load_dotenv()
 
@@ -71,6 +74,26 @@ def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     name = lines[1].split(': ')[1]
     
     return category, name if name != "None" else None
+
+def generate_summary(memory: ConversationBufferMemory) -> str:
+    prompt = f"""
+    Based on the following conversation, generate a concise summary of the team member's update. 
+    Make sure to include the following attributes:
+    - The user's email
+    - The projects that they worked on
+    - Their accomplishments on those projects
+    - The blockers that came up on each project
+    - The risks that arose on the project that may undermine company goals
+    - Any personal updates
+    
+    Conversation:
+    {memory.chat_memory.messages}
+    
+    Summary:
+    """
+    
+    summary = chat_llm.invoke(prompt)
+    return summary.content
 
 def process_input(state: AgentState) -> AgentState:
     messages = state["messages"]
@@ -156,6 +179,7 @@ def check_update(state: AgentState) -> AgentState:
 
 # Build graph
 def should_continue(state: AgentState) -> Literal["continue", "end"]:
+    # print(f"The state is: \n", state)
     if all(state["update_state"].values()):
         return "end"
     return "continue"
@@ -203,7 +227,7 @@ async def start():
         """Hello!
         I'm here to help you craft an update for your manager.
         These updates will include the following details:
-        - Your name
+        - Your email address
         - The project that you're working on
         - Any recent accomplishments or wins that you've had on that project
         - Any blockers or issues that you've faced on that project
@@ -228,10 +252,18 @@ async def on_message(message: cl.Message):
         "category": category,
         "user_name": user_name,
     })
+
+    print(f"Result: \n", result)
     
-    if result == END:
+    if result["next_question"] == None:
         summary = generate_summary(memory)
-        await cl.Message(f"Great! We've completed your update. Here's a summary of what we've discussed:\n\n{summary}\n\nIs there anything else you'd like to add or modify?").send()
+        await cl.Message(f"Great! We've completed your update. Here's a summary of what we've discussed:\n\n{summary}\n\nWe'll go ahead and save this update for your manager.").send()
+        
+        # Save to Qdrant
+        user_name = result["user_name"]
+        # project = result["update_state"].get("project", "Unknown Project")
+        result = write_to_qdrant(user_name, summary)
+
     elif isinstance(result, dict):
         if result["next_question"]:
             await cl.Message(content=result["next_question"]).send()

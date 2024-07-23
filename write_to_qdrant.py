@@ -8,14 +8,20 @@ To Do:
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import Qdrant
 import os
 from datetime import datetime
 
-def write_to_qdrant(user_name: str, project: str, update_content: str):
+QDRANT_URL = os.environ.get("QDRANT_URL")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
+
+# project: str,
+
+def write_to_qdrant(user_name: str, update_content: str):
     # Initialize Qdrant client
     client = QdrantClient(
-        url=os.environ("QDRANT_URL"),
-        api_key=os.environ("QDRANT_API_KEY")
+        url=QDRANT_URL,
+        api_key=QDRANT_API_KEY
     )
 
     # Initialize OpenAI embeddings
@@ -23,28 +29,34 @@ def write_to_qdrant(user_name: str, project: str, update_content: str):
     embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
 
     # Generate embeddings for the update content
-    vector = embedding_model.embed_query(update_content)
+    # vector = embedding_model.embed_query(update_content)
+    vectorstore = Qdrant(client, collection_name="one-on-ones", embeddings=embedding_model)
 
     # Create metadata
-    metadata = {
-        "name": user_name,
-        "project": project,
+    metadata = [{
+        "user": user_name,
+        # "project": project,
         "date": datetime.now().isoformat()
-    }
+    }]
+    
+    vectorstore.add_texts([update_content], metadatas=metadata)
+
+
+    """
 
     # Create a unique ID for the update
-    update_id = f"{user_name}_{project}_{int(datetime.now().timestamp())}"
+    # update_id = f"{user_name}_{int(datetime.now().timestamp())}"
 
     # Add the update to Qdrant with metadata
     client.upsert(
         collection_name="one-on-ones",
         points=[
             models.PointStruct(
-                id=update_id,
                 vector=vector,
                 payload={**metadata, "content": update_content}
             )
         ]
     )
-
-    return f"Update saved successfully with ID: {update_id}"
+    """
+    print("Update saved successfully.")
+    return f"Update saved successfully."
