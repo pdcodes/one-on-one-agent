@@ -30,7 +30,7 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "One on One Agent"
 
 # Setup OpenAI
-chat_llm = ChatOpenAI(model="gpt-4", temperature=0.7, streaming=True)
+chat_llm = ChatOpenAI(model="gpt-4", temperature=0.5, streaming=True)
 
 # Setup UpdateChecker tool
 update_checker = UpdateChecker()
@@ -45,13 +45,11 @@ class AgentState(TypedDict):
     category: Optional[str]
     user_name: Optional[str]
 
-# Define nodes
-from prompts import chat_prompt
-
 def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     prompt = f"""
     Analyze the following user input and determine which category it best fits into:
-    - name: If the input appears to be the user's name
+    - week_time: If the input indicates whether it's the beginning or end of the week
+    - name: If the input appears to be the user's email
     - project: Information about the current project
     - accomplishments: Recent achievements or milestones related to the specific project
     - blockers: Issues or challenges faced in completing specific tasks for the project
@@ -59,21 +57,29 @@ def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     - personal_updates: Personal news unrelated to the project
     - unclear: If the input doesn't clearly fit into any category
 
-    If the category is "name", also extract the name from the input.
+    If the category is "name", also extract the email from the input.
+    If the category is "week_time", also extract whether it's the beginning or end of the week.
 
     User input: {human_input}
 
     Respond in the following format:
     Category: [category]
     Name: [extracted name if category is "name", otherwise "None"]
+    Week Time: [beginning/end if category is "week_time", otherwise "None"]
     """
     
     response = chat_llm.invoke(prompt)
     lines = response.content.strip().split('\n')
     category = lines[0].split(': ')[1].lower()
     name = lines[1].split(': ')[1]
+    week_time = lines[2].split(': ')[1]
     
-    return category, name if name != "None" else None
+    if category == "week_time":
+        return category, week_time
+    elif category == "name":
+        return category, name if name != "None" else None
+    else:
+        return category, None
 
 def generate_summary(memory: ConversationBufferMemory) -> str:
     prompt = f"""
@@ -119,54 +125,71 @@ def check_update(state: AgentState) -> AgentState:
     memory = state["memory"]
     
     # Use LLM to categorize the input
-    category, detected_name = categorize_input(last_human_message)
+    category, detected_value = categorize_input(last_human_message)
     
     # Update the update_state based on the LLM categorization
     if category in update_state:
         update_state[category] = True
     
     # Handle name detection
-    if category == "name" and detected_name:
+    if category == "name" and detected_value:
         update_state["name"] = True
-        state["user_name"] = detected_name
-    elif not update_state["name"] and detected_name:
+        state["user_name"] = detected_value
+    elif not update_state["name"] and detected_value:
         # If name was detected in another category of input
         update_state["name"] = True
-        state["user_name"] = detected_name
+        state["user_name"] = detected_value
     
-    # Check if all information has been collected
-    if all(update_state.values()):
-        state["next_question"] = None
-        return state
+    # Handle week_time detection
+    if category == "week_time":
+        update_state["is_beginning_of_week"] = detected_value.lower() == "beginning"
     
-    # Determine the next question to ask
-    missing_elements = [key for key, value in update_state.items() if not value]
-    next_element = missing_elements[0] if missing_elements else None
-    
-    prompts = {
-        "name": "Could you please tell me your name?",
-        "project": "What project are you currently working on?",
-        "accomplishments": "What recent accomplishments or achievements have you had on this project?",
-        "blockers": "Have you experienced any issues or blockers recently on this project?",
-        "risks": "Are there any significant risks that might affect the goals of this project?",
-        "personal_updates": "Do you have any notable personal updates you'd like to share?"
-    }
-    
-    # Generate AI response
+    # Generate AI response and follow-up question
     chat_history = "\n".join([f"{m.type}: {m.content}" for m in memory.chat_memory.messages])
-    response = chat_llm.invoke(
-        chat_prompt.format_prompt(
-            chat_history=chat_history,
-            human_input=last_human_message
-        ).to_messages()
-    )
     
+    # Define prompts for beginning and end of week
+    beginning_of_week_prompt = """
+    For the beginning of the week, focus on:
+    1. What project(s) the user is currently working on and what specific tasks are related to the project(s)
+    2. What would the user would like to get done by the end of the week
+    3. Are there any potential blockers or unknowns that that may come up this week
+    4. Did anything really cool happen in the last week that the user would like to share or celebrate
+    """
+    
+    end_of_week_prompt = """
+    For the end of the week, focus on:
+    1. Did the user finish the following tasks that they set out to do
+    2. Did the user accomplish what they wanted to get done by the end of the week? If not, what prevented them from accomplishing that?
+    3. How do you feel this week went?
+    """
+    
+    week_specific_prompt = beginning_of_week_prompt if update_state["is_beginning_of_week"] else end_of_week_prompt
+    
+    # Determine missing information
+    missing_info = [key for key, value in update_state.items() if not value and key != "is_beginning_of_week"]
+    
+    prompt = f"""
+    Based on the following conversation and update state, generate a response to the user's last message and a direct question to gather missing information. The response should acknowledge the user's input and transition to the next question naturally but explicitly.
+
+    Chat history:
+    {chat_history}
+
+    Last human message: {last_human_message}
+
+    Update state:
+    {update_state}
+
+    {week_specific_prompt}
+
+    Missing information: {', '.join(missing_info)}
+
+    Focus on gathering one piece of missing information at a time. Be direct but maintain a conversational tone. If all required information has been gathered, provide a concluding message.
+
+    Response and follow-up question:
+    """
+    
+    response = chat_llm.invoke(prompt)
     ai_message = response.content
-    
-    # Add the next question if there are still missing elements
-    if next_element:
-        next_question = prompts[next_element]
-        ai_message += f"\n\n{next_question}"
     
     memory.chat_memory.add_ai_message(ai_message)
     
@@ -177,10 +200,11 @@ def check_update(state: AgentState) -> AgentState:
     
     return state
 
-# Build graph
+# Handle loop
 def should_continue(state: AgentState) -> Literal["continue", "end"]:
-    # print(f"The state is: \n", state)
-    if all(state["update_state"].values()):
+    update_state = state["update_state"]
+    required_fields = ["name", "project", "accomplishments", "blockers", "risks", "personal_updates"]
+    if all(update_state.get(field, False) for field in required_fields):
         return "end"
     return "continue"
 
@@ -209,6 +233,7 @@ graph = workflow.compile()
 @cl.on_chat_start
 async def start():
     update_state = {
+        "is_beginning_of_week": False,
         "name": False,
         "project": False,
         "accomplishments": False,
@@ -226,14 +251,7 @@ async def start():
     await cl.Message(
         """Hello!
         I'm here to help you craft an update for your manager.
-        These updates will include the following details:
-        - Your email address
-        - The project that you're working on
-        - Any recent accomplishments or wins that you've had on that project
-        - Any blockers or issues that you've faced on that project
-        - Any notable risks about the project that should be escalated
-        - Any personal updates not related to this project
-        To get started, could you please tell me your name?""").send()
+        To get started, could you please tell me if this is for the beginning of the week or the end of the week?""").send()
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -255,13 +273,12 @@ async def on_message(message: cl.Message):
 
     print(f"Result: \n", result)
     
-    if result["next_question"] == None:
+    if should_continue(result) == "end":
         summary = generate_summary(memory)
         await cl.Message(f"Great! We've completed your update. Here's a summary of what we've discussed:\n\n{summary}\n\nWe'll go ahead and save this update for your manager.").send()
         
         # Save to Qdrant
         user_name = result["user_name"]
-        # project = result["update_state"].get("project", "Unknown Project")
         result = write_to_qdrant(user_name, summary)
 
     elif isinstance(result, dict):

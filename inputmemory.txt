@@ -1,0 +1,153 @@
+{
+  "memory": {
+    "chat_memory": {
+      "messages": [
+        {
+          "content": "It's the end of the week",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: I see, it's the end of the week already. Time surely flies! \n\nFollow-up question: Could you share with me if you were able to finish the tasks you set out to do at the beginning of the week? And did you accomplish everything you wanted to by now? If not, what do you think held you back? Also, how would you say this week went for you in general?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "I got quite a lot done. I finished refining the prompt logic for the agent that I'm in the process of implementing.\n\nI didn't get everything done that I wanted to though. I needed to spend some time reviewing the langgraph documentation to finish it.\n\nOverall, this week went well though. I enjoyed what I was working on.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: That sounds like a productive week! It's great to hear that you enjoyed your work while refining the prompt logic for the agent. \n\nFollow-up question: I understand that reviewing the langgraph documentation was a bit of a roadblock. Are there any other issues or risks you foresee that could affect the completion of your project? Also, could you please tell me a bit more about the project you're working on and what it involves? And, if you don't mind sharing, I'd love to learn your name.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "I don't anticipate any other risks or issues. The project that I'm working on is an AI agent that will help my team members provide updates to our manager.\n\nMy name is pi.dudka@gmail.com",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: That's fantastic to hear, and the AI agent project you're working on sounds quite impressive. It's a pleasure to meet you!\n\nFollow-up question: I'm glad to hear you don't foresee any other risks or issues. Now that you've refined the prompt logic for the agent, what's the next step in your project? Also, are there any personal updates or news you'd like to share?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "The next step in the project is to finish all of the logic for the agent and ensure that it's writing to my vectorstore.\n\nOn a personal note, this weekend I'm going to take some time away from coding and go canoeing.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: It's exciting to see progress being made on your AI agent project, and it's important to ensure that the agent is writing to your vectorstore correctly. It's also great to hear that you're taking some time off to enjoy canoeing. That sounds like a refreshing break!\n    \nFollow-up question: Once you've ensured the agent is writing to the vectorstore, what would be the next milestone for your project? Also, is there anything specific you're looking forward to on your canoeing trip?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "The next milestone for the project is going to be to update the chainlit interface.\n\nAnd, no, there isn't anything specific that I'm looking forward to on my canoeing trip.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: Updating the chainlit interface certainly sounds like an important next step for your project. And even though there's nothing specific, the canoeing trip should still be a great way to relax and recharge.\n\nFollow-up question: Could you explain a bit more about what updating the chainlit interface involves and what impact it will have on your project? Also, as we head into a new week, do you have any specific goals or tasks you're planning to tackle? On a personal side, aside from canoeing, is there anything else you're planning to do over the weekend?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "I don't have any more to say about the chainlit interface, or the canoe trip.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: That's completely fine! It's always important to take time to unwind and reflect on our accomplishments. \n\nFollow-up question: It seems like you've had a productive week and you have a clear vision for your project going forward. As we're wrapping up the week, could you tell me a bit more about how you feel this week went for you in terms of productivity and personal satisfaction? And, for the new week ahead, do you already have some tasks or goals in mind that you would like to achieve?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "I feel really good about this week, but I don't have my tasks or goals for next week already identified.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: It's wonderful to hear that you're feeling good about this week! It certainly seems like you've made significant progress on your project. \n\nFollow-up question: That's perfectly alright not to have your tasks or goals for next week already identified. As we're wrapping up, do you have any reflection on the past week that might help you in planning for the next week? And on a personal note, aside from canoeing, do you have any other plans or activities you are looking forward to next week?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "No and no",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "example": false
+        },
+        {
+          "content": "Response: I understand, not to worry. It's great to reflect on a week well spent and take some time to relax before diving into the next one. \n\nFollow-up question: Taking the time to unwind and recharge over the weekend is always beneficial. As you prepare for the coming week, do you have any strategies or methods you usually use to plan your tasks and set your goals? And on a lighter note, do you have a favorite spot for canoeing or any other outdoor activities you enjoy?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        }
+      ]
+    },
+    "return_messages": true,
+    "human_prefix": "Human",
+    "ai_prefix": "AI",
+    "memory_key": "history"
+  },
+  "update_state": {
+    "is_beginning_of_week": false,
+    "name": true,
+    "project": false,
+    "accomplishments": true,
+    "blockers": true,
+    "risks": false,
+    "personal_updates": false
+  },
+  "last_human_message": "No and no",
+  "next_question": "Response: I understand, not to worry. It's great to reflect on a week well spent and take some time to relax before diving into the next one. \n\nFollow-up question: Taking the time to unwind and recharge over the weekend is always beneficial. As you prepare for the coming week, do you have any strategies or methods you usually use to plan your tasks and set your goals? And on a lighter note, do you have a favorite spot for canoeing or any other outdoor activities you enjoy?",
+  "category": null,
+  "user_name": "pi.dudka@gmail.com"
+}
