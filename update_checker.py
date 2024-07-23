@@ -1,30 +1,32 @@
 """
 To Do:
 - Define the necessary elements of a 'complete' update
-- Determine which elements are 
+- Determine which elements are missing
 """
 # update_checker.py
-from langchain.schema import BaseTool, ToolOutput
+from langchain.tools import BaseTool
 
 class UpdateChecker(BaseTool):
-    def __init__(self):
-        super().__init__(
-            name="UpdateChecker", 
-            description="Checks the user's response to determine if it should be considered a complete update.")
+    name = "UpdateChecker"
+    description = "Checks the user's response to determine if it contains relevant update information."
 
-    def invoke(self, response: str) -> ToolOutput:
+    def _run(self, response: str) -> str:
         required_elements = [
-            "user's name",
-            "project the user is working on",
-            "user's recent accomplishments or achievements",
-            "issues or blockers",
-            "significant risks",
-            "notable personal updates"
+            "name",
+            "project",
+            "accomplishments",
+            "blockers",
+            "risks",
+            "personal updates"
         ]
         
-        missing_elements = [element for element in required_elements if element not in response.lower()]
+        found_elements = [element for element in required_elements if element.lower() in response.lower()]
+        missing_elements = [element for element in required_elements if element not in found_elements]
         
         if missing_elements:
-            return ToolOutput(content=f"The response is missing the following elements: {', '.join(missing_elements)}")
+            return f"The update is missing information about: {', '.join(missing_elements)}."
         else:
-            return ToolOutput(content="The response contains all the required elements. Great job!.")
+            return "The update contains information about all required elements."
+
+    async def _arun(self, response: str) -> str:
+        return self._run(response)

@@ -1,6 +1,6 @@
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain.prompts import PromptTemplate
 
-system_template = """
+context_template = """
 You are an enthusiastic and helpful teammate. Your job is to help the user craft an 
 update for their manager on the project they are working on. An update should include the following information:
 - The user's name
@@ -18,19 +18,12 @@ If the user has provided information about a specific aspect, acknowledge it and
 
 Your responses should be concise and focused on gathering the required information. Avoid lengthy explanations or tangents.
 
-If the user provides multiple pieces of information in the same message, you should attempt to discern which parts of the update have been completed by their response.
-"""
-
-human_template = """
 Chat History: {chat_history}
-Human: {human_input}
-AI:
+Question: {question}
+Answer:
 """
 
-system_message_prompt = SystemMessagePromptTemplate.from_template(system_template)
-human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
-
-chat_prompt = ChatPromptTemplate.from_messages([
-    system_message_prompt,
-    human_message_prompt,
-])
+initial_context_prompt = PromptTemplate(
+    input_variables=["chat_history", "question"],
+    template=context_template
+)
