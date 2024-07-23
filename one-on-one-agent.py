@@ -200,15 +200,15 @@ async def start():
     cl.user_session.set("user_name", None)
     
     await cl.Message(
-        """Hello!\n 
-        I'm here to help you craft an update for your manager.\n
-        These updates will include the following details:\n
-        - Your name\n
-        - The project that you're working on\n
-        - Any recent accomplishments or wins that you've had on that project\n
-        - Any blockers or issues that you've faced on that project\n
-        - Any notable risks about the project that should be escalated\n
-        - Any personal updates not related to this project\n\n
+        """Hello!
+        I'm here to help you craft an update for your manager.
+        These updates will include the following details:
+        - Your name
+        - The project that you're working on
+        - Any recent accomplishments or wins that you've had on that project
+        - Any blockers or issues that you've faced on that project
+        - Any notable risks about the project that should be escalated
+        - Any personal updates not related to this project
         To get started, could you please tell me your name?""").send()
 
 @cl.on_message

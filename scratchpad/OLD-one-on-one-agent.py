@@ -44,7 +44,7 @@ load_dotenv()
 
 # ---- SETTING UP OUR TOOL BELT ---- # 
 # Import our tools
-from update_checker import UpdateChecker
+from scratchpad.update_checker import UpdateChecker
 update_checker = UpdateChecker()
 
 # from write_to_qdrant import WriteToQdrant
