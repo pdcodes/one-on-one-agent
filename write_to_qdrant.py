@@ -19,10 +19,11 @@ def write_to_qdrant(user_name: str, project: str, update_content: str):
     )
 
     # Initialize OpenAI embeddings
-    embeddings = OpenAIEmbeddings()
+    # embeddings = OpenAIEmbeddings()
+    embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
 
     # Generate embeddings for the update content
-    vector = embeddings.embed_query(update_content)
+    vector = embedding_model.embed_query(update_content)
 
     # Create metadata
     metadata = {
@@ -36,7 +37,7 @@ def write_to_qdrant(user_name: str, project: str, update_content: str):
 
     # Add the update to Qdrant with metadata
     client.upsert(
-        collection_name="team_updates",
+        collection_name="one-on-ones",
         points=[
             models.PointStruct(
                 id=update_id,
