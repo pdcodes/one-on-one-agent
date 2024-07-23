@@ -196,11 +196,13 @@ def process_confirmation(state: AgentState) -> str:
         result = write_to_qdrant(user_name, project, summary)
         
         state["messages"].append(AIMessage(content=f"Great! {result} Is there anything else I can help you with?"))
-        return "end"
+        state["confirmation_state"] = None  # Reset confirmation state
+        return "continue"  # Changed to "continue" to allow for further interaction
     
     elif "no" in last_human_message:
         state["messages"].append(AIMessage(content="Alright, I won't save the update. Is there anything else I can help you with?"))
-        return "end"
+        state["confirmation_state"] = None  # Reset confirmation state
+        return "continue"  # Changed to "continue" to allow for further interaction
     
     else:
         state["messages"].append(AIMessage(content="I'm sorry, I didn't understand. Please answer with 'Yes' or 'No'. Would you like to save this update?"))
@@ -213,9 +215,12 @@ def should_continue(state: AgentState) -> Literal["process_input", "check_update
         return "confirm"
     elif all(state["update_state"].values()):
         return "confirm"
+    elif state["last_human_message"].strip() == "":
+        return "end"  # Add this condition to break the loop when there's no input
     else:
-        return "check_update"
+        return "process_input"  # Changed from "check_update" to "process_input"
 
+# Build graph
 # Build graph
 workflow = StateGraph(AgentState)
 
@@ -225,13 +230,21 @@ workflow.add_node("process_confirmation", process_confirmation)
 
 workflow.set_entry_point("process_input")
 
-workflow.add_edge("process_input", "check_update")
+workflow.add_conditional_edges(
+    "process_input",
+    should_continue,
+    {
+        "process_input": "check_update",  # Changed this line
+        "confirm": "process_confirmation",
+        "end": END,
+    }
+)
 
 workflow.add_conditional_edges(
     "check_update",
     should_continue,
     {
-        "check_update": "process_input",
+        "process_input": "process_input",
         "confirm": "process_confirmation",
         "end": END,
     }
@@ -239,9 +252,9 @@ workflow.add_conditional_edges(
 
 workflow.add_conditional_edges(
     "process_confirmation",
-    lambda x: "end" if x == "end" else "process_input",
+    lambda x: x,
     {
-        "process_input": "process_input",
+        "continue": "process_input",
         "end": END,
     }
 )
