@@ -1,44 +1,47 @@
-{
-  "memory": {
-    "chat_memory": {
-      "messages": [
-        {
-          "content": "Hi there, I'm Peter.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Hi Peter! It's great to meet you. What project are you currently working on?\n\nWhat project are you currently working on?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        }
-      ]
-    },
-    "return_messages": true,
-    "human_prefix": "Human",
-    "ai_prefix": "AI",
-    "memory_key": "history"
-  },
-  "update_state": {
-    "name": true,
-    "project": false,
-    "accomplishments": false,
-    "blockers": false,
-    "risks": false,
-    "personal_updates": false
-  },
-  "last_human_message": "",
-  "next_question": "I'm sorry, but I didn't receive any input. Could you please try again?",
-  "category": [
-    "name"
-  ],
-  "user_name": "Peter",
-  "last_question": "What project are you currently working on?",
-  "confirmation_state": null
-}
+
+            Based on the following chat history, ask a single question to gather information about the user's project.
+            The question should be conversational and not formulaic. Do not ask about multiple categories.
+            
+            Chat history:
+            human: Hi there, my name is Peter!
+ai: Hi Peter! Do you have a specific project you're working on that you'd like to discuss?
+human: I'm working on an app that will help me and my teammates provide updates to our manager.
+ai: That sounds like a great initiative, Peter! What milestones have you and your team reached so far in the development of this app?
+human: I just finished the basic agent logic!
+ai: That's a great progress, Peter! Are there any challenges or obstacles you're currently facing in the next phase of the project?
+human: It took me a long time to figure out how to actually implement the logic. I needed to review the langgraph documentation.
+ai: Do you anticipate any other areas that might require a significant time investment or additional learning, similar to your experience with implementing the logic?
+human: Not at this time
+ai: Peter, do you foresee any potential risks or issues that could delay the project's development in the near future?
+human: The main risk is that this part of the project has taken a long time and it may not finish on schedule now
+ai: Peter, how are you planning to address the potential delay in the project schedule?
+human: I'm going to need to work with my teammates to catch up
+ai: Peter, have you and your team discussed any specific strategies or plans to make up for the lost time and get back on schedule?
+human: Not right now
+ai: Peter, when do you plan to sit down with your team to discuss strategies for getting back on track with the project timeline?
+human: We have not set a specific time to meet to discuss how we'll get the project back on track
+ai: Peter, could you share any personal updates or changes in your role or responsibilities within the project that might have happened recently?
+human: There have been no changes in my role on this project.
+
+My one personal update is that I'm going to be on vacation all of next week. So I'll need someone else to help finish this project.
+ai: Great! Here's a summary of your update:
+
+Peter is working on an application that aims to help his team provide updates to their manager. He has completed the basic agent logic of the app. He faced challenges in understanding and implementing the logic which required reviewing the langgraph documentation, and no other areas of similar difficulty are anticipated at this time. However, the time taken on this part of the project may cause a delay in the overall schedule. To address this, Peter plans to collaborate with his teammates to catch up, although they haven't yet discussed specific strategies or set a meeting time to plan for this. No changes have been made to Peter's role on the project. He will be on vacation next week and therefore needs someone else to help finish the project.
+
+Would you like me to save this update? Please respond with Yes or No.
+human: I would like you to save the update
+ai: Peter, is this the first time you're taking a vacation since the beginning of the project?
+human: Yes
+ai: Peter, do you go by any other names or nicknames that your teammates might use when referring to you?
+human: My full name is Peter Dudka, but I go by Peter
+ai: Peter, who would be your point of contact or the person taking over your responsibilities while you're on vacation next week?
+human: No one has been named
+ai: Peter, have you thought about who might be best suited to take over your responsibilities while you're away on vacation?
+human: No
+ai: Peter, when do you think would be a good time to discuss with your team about who could take over your responsibilities while you're on vacation?
+human: I don't know, my manager will need to figure that out
+ai: Peter, have you informed your manager about your upcoming vacation and the need for someone to take over your responsibilities during that time?
+human: Yes
+            
+            Question:
+            

@@ -113,7 +113,6 @@ def process_input(state: AgentState) -> AgentState:
         "memory": memory,
         "update_state": update_state,
         "last_human_message": human_input,
-        "last_question": None,  # Add this line
     }
 
 def check_update(state: AgentState) -> AgentState:
@@ -162,7 +161,6 @@ def check_update(state: AgentState) -> AgentState:
         "messages": state["messages"] + [AIMessage(content=ai_message)],
         "category": categories,
         "next_message": ai_message,
-        "last_question": ai_message,  # Add this line
     }
 
 def generate_summary(memory: ConversationBufferMemory) -> str:
@@ -204,6 +202,21 @@ def process_confirmation(state: AgentState) -> AgentState:
     return state
 
 # Manage the cycle
+"""
+def should_continue(state: AgentState) -> Literal["process_input", "check_update", "confirm", "end"]:
+    if state.get("confirmation_state") == "pending":
+        return "confirm"
+    elif all(state["update_state"].values()) and state.get("confirmation_state") is None:
+        return "check_update"
+    elif all(state["update_state"].values()):
+        return "confirm"
+    elif state["last_human_message"].strip() == "":
+        return "end"
+    elif state.get("next_question") is not None:
+        return "process_input"
+    else:
+        return "check_update"
+"""
 def should_continue(state: AgentState) -> Literal["process_input", "check_update", "confirm", "end"]:
     if state.get("confirmation_state") == "pending":
         return "confirm"
@@ -211,8 +224,6 @@ def should_continue(state: AgentState) -> Literal["process_input", "check_update
         return "confirm"
     elif state["last_human_message"].strip() == "":
         return "end"
-    elif state.get("last_question") == state.get("next_message"):
-        return "process_input"
     else:
         return "check_update"
 
@@ -229,9 +240,10 @@ workflow.add_conditional_edges(
     "process_input",
     should_continue,
     {
-        "process_input": "check_update",
+        "check_update": "check_update",
         "confirm": "process_confirmation",
         "end": END,
+        "process_input": "process_input",
     }
 )
 
@@ -239,6 +251,7 @@ workflow.add_conditional_edges(
     "check_update",
     should_continue,
     {
+        "check_update": "check_update",
         "process_input": "process_input",
         "confirm": "process_confirmation",
         "end": END,
@@ -247,9 +260,9 @@ workflow.add_conditional_edges(
 
 workflow.add_conditional_edges(
     "process_confirmation",
-    lambda x: "process_input" if x["confirmation_state"] is None else "confirm",
+    lambda x: "check_update" if x["confirmation_state"] is None else "confirm",
     {
-        "process_input": "process_input",
+        "check_update": "process_input",
         "confirm": "process_confirmation",
     }
 )
@@ -310,15 +323,14 @@ async def on_message(message: cl.Message):
     if result == END:
         await cl.Message("Thank you for using the update assistant. Is there anything else I can help you with?").send()
     elif isinstance(result, dict):
-        if "messages" in result and result["messages"]:
-            last_message = result["messages"][-1]
-            if isinstance(last_message, AIMessage):
-                await cl.Message(content=last_message.content).send()
-        
         cl.user_session.set("memory", result.get("memory", memory))
         cl.user_session.set("update_state", result.get("update_state", update_state))
         cl.user_session.set("category", result.get("category", category))
         cl.user_session.set("user_name", result.get("user_name", user_name))
         cl.user_session.set("confirmation_state", result.get("confirmation_state", confirmation_state))
+        
+        # Send the stored next_message
+        if "next_message" in result:
+            await cl.Message(content=result["next_message"]).send()
     else:
         await cl.Message("I'm sorry, but I encountered an unexpected error. Could you please try again?").send()

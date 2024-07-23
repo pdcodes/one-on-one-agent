@@ -3,14 +3,14 @@
     "chat_memory": {
       "messages": [
         {
-          "content": "Hi there, my name is Peter and I'm working on a new project.",
+          "content": "Hi there, my name is Peter!",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "human",
           "example": false
         },
         {
-          "content": "Hi Peter, nice to meet you! It's always exciting to be working on a new project. Could you tell me a bit more about it? What's the project all about?\n\nWhat recent accomplishments or achievements have you had on this project?",
+          "content": "Hi Peter! What kind of project are you currently working on?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -19,14 +19,7 @@
           "invalid_tool_calls": []
         },
         {
-          "content": "The project is creating a new AI tool that helps my team members provide updates to their manager.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "That sounds like a very impactful project, Peter. It's great to hear that you're working on something that can potentially change how your team communicates. Could you share any recent accomplishments or milestones that you've achieved in this project?\n\nWhat recent accomplishments or achievements have you had on this project?",
+          "content": "Peter, could you tell me more about the specific tasks involved in your project?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -35,14 +28,7 @@
           "invalid_tool_calls": []
         },
         {
-          "content": "Recently I completed the agent logic for the project to spec out the main flow of the application.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "That's a significant accomplishment, Peter! Getting the main flow of the application down is a huge step. Have you faced any issues or blockers lately in this project?\n\nHave you experienced any issues or blockers recently on this project?",
+          "content": "Peter, are there any particular challenges you're encountering in your project?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -51,14 +37,7 @@
           "invalid_tool_calls": []
         },
         {
-          "content": "The main issue that I ran into was that I had to review a lot of the langgraph documentation to understand how to implement the logic.\n\nI'm really concerned that this project won't finish on time now.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Reviewing documentation can indeed be time-consuming. Thanks for sharing that, Peter. It sounds like the project timeline is a significant risk. Is there anything else that might pose a risk to the goals of this project?\n\nCan you discuss any other significant risks that might exist relative to the goals of this project?\n\nDo you have any notable personal updates you'd like to share?",
+          "content": "Peter, how are you planning to overcome these challenges in your project?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -67,14 +46,178 @@
           "invalid_tool_calls": []
         },
         {
-          "content": "The only other significant risk is that I'm going to be on vacation for the next week, so someone else will need to be available to finish the project.",
+          "content": "Peter, what is the ultimate goal or desired outcome of your project?",
           "additional_kwargs": {},
           "response_metadata": {},
-          "type": "human",
-          "example": false
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
         },
         {
-          "content": "That's a valid point, Peter. Handing over work can be a little tricky, but it's vital for the continuity of the project. I hope you have a great vacation! \n\nBy the way, do you have any notable personal updates that you'd like to share, unrelated to this specific project?\n\nGreat! Here's a summary of your update:\n\nPeter is working on a project to create a new AI tool that helps team members provide updates to their managers. He completed a major accomplishment by finishing the agent logic for the project, which maps out the main flow of the application. However, he faced a blocker in needing to review a lot of langgraph documentation to understand how to implement the logic. As a result, he is concerned about the project not finishing on time, which poses a significant risk. Another risk to the project is that Peter will be on vacation for the next week, requiring someone else to finish the project.\n\nWould you like me to save this update? Please respond with Yes or No.",
+          "content": "Peter, what kind of timeline or deadlines are you working with for this project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you share with me who else is involved in your project and their respective roles?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you tell me more about the resources you are using or plan to use for your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you tell me how progress is being tracked and monitored for your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, have you experienced any unexpected changes or setbacks in your project and how did you handle them?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you share any successes or milestones you've achieved so far in your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, have you received any feedback or suggestions that have helped shape your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you tell me about any future plans or next steps you have for your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, how do you foresee the impact of your project once it's completed?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you share with me how your project has been influenced by the feedback you've received so far?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you tell me more about any external factors or influences that may affect the outcome of your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you elaborate on any learning or insights you've gained so far from working on your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you share with me how you are incorporating the lessons learned from this project into your future plans?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you elaborate on how the feedback you've received has been implemented into your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you share more about how you're keeping your team motivated and focused during the course of this project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, could you tell me more about how you're managing the budget for your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, have you identified any risks or potential issues that might arise in your project and how are you preparing for them?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, can you tell me more about the strategies you're using to ensure the quality and efficiency of your project?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": []
+        },
+        {
+          "content": "Peter, how are you incorporating any new technologies or tools in your project to improve its efficiency or outcome?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -91,19 +234,18 @@
   },
   "update_state": {
     "name": true,
-    "project": true,
-    "accomplishments": true,
-    "blockers": true,
-    "risks": true,
-    "personal_updates": true
+    "project": false,
+    "accomplishments": false,
+    "blockers": false,
+    "risks": false,
+    "personal_updates": false
   },
-  "last_human_message": "The only other significant risk is that I'm going to be on vacation for the next week, so someone else will need to be available to finish the project.",
+  "last_human_message": "Hi there, my name is Peter!",
   "next_question": null,
   "category": [
-    "risks",
-    "personal_updates"
+    "name"
   ],
   "user_name": "Peter",
   "last_question": null,
-  "confirmation_state": "pending"
+  "confirmation_state": null
 }
