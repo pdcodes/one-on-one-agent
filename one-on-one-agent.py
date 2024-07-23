@@ -100,7 +100,6 @@ def process_input(state: AgentState) -> AgentState:
     human_input = messages[-1].content if isinstance(messages[-1], HumanMessage) else ""
     
     if not human_input.strip():
-        # Don't process empty messages
         return {
             **state,
             "last_human_message": "",
@@ -122,20 +121,16 @@ def check_update(state: AgentState) -> AgentState:
     last_human_message = state["last_human_message"]
     memory = state["memory"]
 
-    # Use LLM to categorize the input
     categories, detected_name = categorize_input(last_human_message)
     
-    # Update the update_state based on the LLM categorization
     for category in categories:
         if category in update_state and category != "unclear":
             update_state[category] = True
     
-    # Handle name detection
     if "name" in categories or (not update_state["name"] and detected_name):
         update_state["name"] = True
         state["user_name"] = detected_name
     
-    # Generate AI response
     chat_history = "\n".join([f"{m.type}: {m.content}" for m in memory.chat_memory.messages])
     response = chat_llm.invoke(
         chat_prompt.format_prompt(
@@ -146,7 +141,6 @@ def check_update(state: AgentState) -> AgentState:
     
     ai_message = response.content
     
-    # Determine if we need to ask another question
     missing_elements = [key for key, value in update_state.items() if not value]
     if missing_elements:
         next_element = missing_elements[0]
@@ -162,7 +156,6 @@ def check_update(state: AgentState) -> AgentState:
         ai_message += f"\n\n{next_question}"
         state["last_question"] = next_question
     else:
-        # All information collected, prepare for summary
         summary = generate_summary(memory)
         ai_message += f"\n\nGreat! Here's a summary of your update:\n\n{summary}\n\nWould you like me to save this update? Please respond with Yes or No."
         state["confirmation_state"] = "pending"
@@ -219,7 +212,7 @@ def should_continue(state: AgentState) -> Literal["process_input", "check_update
     if state.get("confirmation_state") == "pending":
         return "confirm"
     elif all(state["update_state"].values()):
-        return "check_update"
+        return "confirm"
     else:
         return "check_update"
 
@@ -230,7 +223,6 @@ workflow.add_node("process_input", process_input)
 workflow.add_node("check_update", check_update)
 workflow.add_node("process_confirmation", process_confirmation)
 
-# Define edges
 workflow.set_entry_point("process_input")
 
 workflow.add_edge("process_input", "check_update")
