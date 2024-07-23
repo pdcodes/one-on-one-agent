@@ -10,11 +10,8 @@ from langchain.schema.output_parser import StrOutputParser
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Annotated, List, Tuple, Union, Optional, Literal
 from langgraph.graph.message import add_messages
-import pprint
-import ast
 
 # ---- CUSTOM LOGIC ---- #
-from prompts import chat_prompt
 from update_checker import UpdateChecker
 from write_to_qdrant import write_to_qdrant
 
@@ -29,8 +26,23 @@ OPENAI_API_KEY= os.environ["OPENAI_API_KEY"]
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "One on One Agent"
 
-# Setup OpenAI
-chat_llm = ChatOpenAI(model="gpt-4", temperature=0.5, streaming=True)
+# Setup Chat LLM
+from prompts import week_by_week_system_template
+from langchain_openai import ChatOpenAI
+from langchain.schema import SystemMessage
+
+chat_llm = ChatOpenAI(
+    model="gpt-4",
+    temperature=0.5,
+    streaming=True
+)
+
+# Wrap the system prompt in a SystemMessage
+system_message = SystemMessage(content=week_by_week_system_template)
+
+# Create a function that prepends the system message to the messages in each call
+def chat_with_system(messages):
+    return chat_llm([system_message] + messages)
 
 # Setup UpdateChecker tool
 update_checker = UpdateChecker()
@@ -43,13 +55,13 @@ class AgentState(TypedDict):
     last_human_message: str
     next_question: Optional[str]
     category: Optional[str]
-    user_name: Optional[str]
+    user_email: Optional[str]  # Change from user_name to user_email
 
 def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     prompt = f"""
     Analyze the following user input and determine which category it best fits into:
     - week_time: If the input indicates whether it's the beginning or end of the week
-    - name: If the input appears to be the user's email
+    - email: If the input appears to be the user's email
     - project: Information about the current project
     - accomplishments: Recent achievements or milestones related to the specific project
     - blockers: Issues or challenges faced in completing specific tasks for the project
@@ -64,7 +76,7 @@ def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
 
     Respond in the following format:
     Category: [category]
-    Name: [extracted name if category is "name", otherwise "None"]
+    Email: [extracted email if category is "email", otherwise "None"]
     Week Time: [beginning/end if category is "week_time", otherwise "None"]
     """
     
@@ -76,21 +88,40 @@ def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     
     if category == "week_time":
         return category, week_time
-    elif category == "name":
+    elif category == "email":
         return category, name if name != "None" else None
     else:
         return category, None
 
 def generate_summary(memory: ConversationBufferMemory) -> str:
     prompt = f"""
-    Based on the following conversation, generate a concise summary of the team member's update. 
-    Make sure to include the following attributes:
-    - The user's email
-    - The projects that they worked on
-    - Their accomplishments on those projects
-    - The blockers that came up on each project
-    - The risks that arose on the project that may undermine company goals
-    - Any personal updates
+    Based on the following conversation, generate a concise summary of the team member's update.
+
+    If the update is from the beginning of a week, it should be formatted as a set of bullets and be generated using the following format:
+    
+    Beginning of Week:
+        Current Tasks:
+            Project: The project that the user worked on
+            Tasks for the week: The specific tasks that the user will be working on
+        Goals for the Week:
+            The goals for the week that the user has
+        Blockers
+            Any blockers, issues, or unknowns that the user might experience
+        Personal Update
+            Any personal updates from the user
+
+    If the update provided by the user is from the end of the week, it should be formatted as a set of bullets and be generated using the following format:
+
+    End of Week:
+        Personal Update
+            Any personal updates from the user
+        Accomplishments:
+            Project: The project that the user worked on
+            The tasks that the user completed
+        Blockers
+            Any blockers, issues, or unknowns that the user experienced this week
+        Risks
+            Any risks or concerns expressed by the user about the project that they are working on and the goals that have been identified for the project
     
     Conversation:
     {memory.chat_memory.messages}
@@ -131,14 +162,14 @@ def check_update(state: AgentState) -> AgentState:
     if category in update_state:
         update_state[category] = True
     
-    # Handle name detection
-    if category == "name" and detected_value:
-        update_state["name"] = True
-        state["user_name"] = detected_value
-    elif not update_state["name"] and detected_value:
-        # If name was detected in another category of input
-        update_state["name"] = True
-        state["user_name"] = detected_value
+    # Handle email detection
+    if category == "email" and detected_value:
+        update_state["email"] = True
+        state["user_email"] = detected_value
+    elif not update_state.get("email") and detected_value:
+        # If email was detected in another category of input
+        update_state["email"] = True
+        state["user_email"] = detected_value
     
     # Handle week_time detection
     if category == "week_time":
@@ -154,6 +185,7 @@ def check_update(state: AgentState) -> AgentState:
     2. What would the user would like to get done by the end of the week
     3. Are there any potential blockers or unknowns that that may come up this week
     4. Did anything really cool happen in the last week that the user would like to share or celebrate
+    5. Make sure to collect the user's email
     """
     
     end_of_week_prompt = """
@@ -161,6 +193,7 @@ def check_update(state: AgentState) -> AgentState:
     1. Did the user finish the following tasks that they set out to do
     2. Did the user accomplish what they wanted to get done by the end of the week? If not, what prevented them from accomplishing that?
     3. How do you feel this week went?
+    4. Make sure to collect the user's email
     """
     
     week_specific_prompt = beginning_of_week_prompt if update_state["is_beginning_of_week"] else end_of_week_prompt
@@ -234,7 +267,7 @@ graph = workflow.compile()
 async def start():
     update_state = {
         "is_beginning_of_week": False,
-        "name": False,
+        "email": False,
         "project": False,
         "accomplishments": False,
         "blockers": False,
@@ -246,12 +279,12 @@ async def start():
     cl.user_session.set("memory", memory)
     cl.user_session.set("update_state", update_state)
     cl.user_session.set("category", None)
-    cl.user_session.set("user_name", None)
+    cl.user_session.set("user_email", None)
     
     await cl.Message(
         """Hello!
         I'm here to help you craft an update for your manager.
-        To get started, could you please tell me if this is for the beginning of the week or the end of the week?""").send()
+        To get started, could you please tell me if this is for the beginning of the week or the end of the week? Please also provide your email address.""").send()
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -259,7 +292,7 @@ async def on_message(message: cl.Message):
     memory = cl.user_session.get("memory")
     update_state = cl.user_session.get("update_state")
     category = cl.user_session.get("category")
-    user_name = cl.user_session.get("user_name")
+    user_email = cl.user_session.get("user_email")  # Change from "user_name" to "user_email"
     
     result = graph.invoke({
         "messages": [HumanMessage(content=message.content)],
@@ -268,7 +301,7 @@ async def on_message(message: cl.Message):
         "last_human_message": message.content,
         "next_question": None,
         "category": category,
-        "user_name": user_name,
+        "user_email": user_email,  # Change from "user_name" to "user_email"
     })
 
     print(f"Result: \n", result)
@@ -278,8 +311,8 @@ async def on_message(message: cl.Message):
         await cl.Message(f"Great! We've completed your update. Here's a summary of what we've discussed:\n\n{summary}\n\nWe'll go ahead and save this update for your manager.").send()
         
         # Save to Qdrant
-        user_name = result["user_name"]
-        result = write_to_qdrant(user_name, summary)
+        user_email = result["user_email"]  # Change from "user_name" to "user_email"
+        result = write_to_qdrant(user_email, summary)  # Change from user_name to user_email
 
     elif isinstance(result, dict):
         if result["next_question"]:

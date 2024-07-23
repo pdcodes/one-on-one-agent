@@ -17,7 +17,7 @@ QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
 
 # project: str,
 
-def write_to_qdrant(user_name: str, update_content: str):
+def write_to_qdrant(user_email: str, update_content: str):
     # Initialize Qdrant client
     client = QdrantClient(
         url=QDRANT_URL,
@@ -34,9 +34,9 @@ def write_to_qdrant(user_name: str, update_content: str):
 
     # Create metadata
     metadata = [{
-        "user": user_name,
+        "user": user_email,
         # "project": project,
-        "date": datetime.now().isoformat()
+        "date": datetime.now().strftime("%Y-%U")
     }]
     
     vectorstore.add_texts([update_content], metadatas=metadata)
