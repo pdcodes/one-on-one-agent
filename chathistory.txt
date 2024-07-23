@@ -3,126 +3,14 @@
     "chat_memory": {
       "messages": [
         {
-          "content": "My name is Peter",
+          "content": "Hi there, I'm Peter.",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "human",
           "example": false
         },
         {
-          "content": "Hi Peter, nice to meet you! What project are you currently working on?\n\nWhat project are you currently working on?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "The new AI tool",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "That sounds interesting, Peter! Can you tell me about any recent accomplishments or achievements you've had with the new AI tool project?\n\nWhat recent accomplishments or achievements have you had on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "I completed the initial agent logic and the update_checker functionality to ensure that we are pushing completed updates!",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "That's great progress, Peter! Congrats on completing the initial agent logic and the update_checker functionality. Have you encountered any issues or blockers recently on this project?\n\nHave you experienced any issues or blockers recently on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "No blockers or issues for right now.\n\nI'm very concerned however that this project is not going to be completed on time.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "I see, no immediate blockers, but you're worried about the timeline. Would you say that's a significant risk to the project's goals? Are there any other risks you're foreseeing at this time?\n\nHave you experienced any issues or blockers recently on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "Yes",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Understood, Peter. It sounds like meeting the deadline is a significant risk for this project. Are there any other risks or potential challenges you foresee that may impact the project's goals?\n\nHave you experienced any issues or blockers recently on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "No",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Got it, Peter. It sounds like the main risk for this project is related to the timeline. Now, on a different note, do you have any personal updates you'd like to share, maybe something unrelated to this project?\n\nHave you experienced any issues or blockers recently on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "None at this time.",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Alright, Peter. Thanks for all the information. So, just to confirm, you're working on the new AI tool and have completed the initial agent logic and update_checker. There are no immediate issues or blockers, but meeting the project deadline is a significant concern. And currently, there are no personal updates. Is there anything else you'd like to add?\n\nHave you experienced any issues or blockers recently on this project?",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "ai",
-          "example": false,
-          "tool_calls": [],
-          "invalid_tool_calls": []
-        },
-        {
-          "content": "Nope, that sounds like a full update!",
-          "additional_kwargs": {},
-          "response_metadata": {},
-          "type": "human",
-          "example": false
-        },
-        {
-          "content": "Great, Peter! Thanks for the thorough update. It's been helpful to understand where you are with the new AI tool project. Keep up the good work, and don't hesitate to reach out if anything comes up.\n\nHave you experienced any issues or blockers recently on this project?",
+          "content": "Hi Peter! It's great to meet you. What project are you currently working on?\n\nWhat project are you currently working on?",
           "additional_kwargs": {},
           "response_metadata": {},
           "type": "ai",
@@ -139,14 +27,18 @@
   },
   "update_state": {
     "name": true,
-    "project": true,
-    "accomplishments": true,
+    "project": false,
+    "accomplishments": false,
     "blockers": false,
     "risks": false,
     "personal_updates": false
   },
-  "last_human_message": "Nope, that sounds like a full update!",
-  "next_question": null,
-  "category": null,
-  "user_name": "Peter"
+  "last_human_message": "",
+  "next_question": "I'm sorry, but I didn't receive any input. Could you please try again?",
+  "category": [
+    "name"
+  ],
+  "user_name": "Peter",
+  "last_question": "What project are you currently working on?",
+  "confirmation_state": null
 }
