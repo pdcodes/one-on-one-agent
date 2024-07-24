@@ -45,7 +45,7 @@ def chat_with_system(messages):
     return chat_llm([system_message] + messages)
 
 # Setup UpdateChecker tool
-update_checker = UpdateChecker()
+# update_checker = UpdateChecker()
 
 # Setup state
 class AgentState(TypedDict):
@@ -55,7 +55,7 @@ class AgentState(TypedDict):
     last_human_message: str
     next_question: Optional[str]
     category: Optional[str]
-    user_email: Optional[str]  # Change from user_name to user_email
+    user_email: Optional[str]  # Change from user_name to user_email!
 
 def categorize_input(human_input: str) -> Tuple[str, Optional[str]]:
     prompt = f"""
