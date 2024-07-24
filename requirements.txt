@@ -1,4 +1,4 @@
-chainlit
+chainlit==0.7.700
 tiktoken
 langchain-qdrant
 langchain==0.2.5
